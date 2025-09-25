@@ -1,0 +1,7 @@
+﻿services:
+  chatsystembackend:
+    image: chatsystembackend
+    build:
+      context: .
+      dockerfile: Dockerfile
+
