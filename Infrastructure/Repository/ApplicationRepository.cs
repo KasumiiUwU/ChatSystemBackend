@@ -1,5 +1,5 @@
 ﻿using System.Linq.Expressions;
-using ChatSystemBackend.Domain.Interfaces;
+using ChatSystemBackend.Application.Interfaces;
 using MongoDB.Driver;
 using MongoDB.Driver.Linq;
 
@@ -66,5 +66,12 @@ public class ApplicationRepository<TEntity> : IApplicationRepository<TEntity> wh
     {
         var filter = Builders<TEntity>.Filter.Eq("id", id);
         return _collection.DeleteOneAsync(filter);
+    }
+
+    public async Task<bool> ExistAsync(object id)
+    {
+        var filter = Builders<TEntity>.Filter.Eq("id", id);
+        var count = await _collection.CountDocumentsAsync(filter);
+        return count > 0;
     }
 }

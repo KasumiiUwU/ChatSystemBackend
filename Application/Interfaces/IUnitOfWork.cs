@@ -1,4 +1,4 @@
-﻿namespace ChatSystemBackend.Domain.Interfaces;
+﻿namespace ChatSystemBackend.Application.Interfaces;
 
 public interface IUnitOfWork
 { 

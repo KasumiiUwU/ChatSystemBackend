@@ -1,6 +1,6 @@
 ﻿using System.Linq.Expressions;
 
-namespace ChatSystemBackend.Domain.Interfaces;
+namespace ChatSystemBackend.Application.Interfaces;
 
 public interface IApplicationRepository<TEntity> where TEntity : class
 { 
@@ -13,4 +13,5 @@ public interface IApplicationRepository<TEntity> where TEntity : class
     Task InsertAsync(TEntity entity);
     Task UpdateAsync(object id, TEntity entity);
     Task DeleteAsync(object id);
+    Task<bool> ExistAsync(object id);
 }

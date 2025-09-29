@@ -1,15 +1,29 @@
-﻿using MongoDB.Driver;
+﻿using System.IdentityModel.Tokens.Jwt;
+using ChatSystemBackend.Application.Interfaces;
+using ChatSystemBackend.Infrastructure.Repository;
+using MongoDB.Driver;
 
 namespace ChatSystemBackend.DependencyInjection;
 
-public class ApplicationServices
+public static class ApplicationServices
 {
-    public IServiceCollection AddApplicationServices(IServiceCollection services, IConfiguration configuration)
+    public static IServiceCollection AddApplicationServices(this IServiceCollection services, IConfiguration configuration)
     {
+        services.AddServices();
+        services.AddDatabaseService(configuration);
+        services.AddHttpContextAccessor();
         return services;
     }
 
-    private static IServiceCollection AddDatabaseService(IServiceCollection services, IConfiguration configuration)
+    //Inject các services
+    private static IServiceCollection AddServices(this IServiceCollection services)
+    {
+        services.AddSingleton<JwtSecurityTokenHandler>();
+        return services;
+    }
+
+    //Khởi tạo database
+    private static IServiceCollection AddDatabaseService(this IServiceCollection services, IConfiguration configuration)
     {
         var connectionString = configuration.GetConnectionString("ChatSystemDB");
         var mongoUrl = MongoUrl.Create(connectionString);
@@ -17,7 +31,9 @@ public class ApplicationServices
         
         var mongoClient = new MongoClient(mongoUrl);
         services.AddSingleton<IMongoDatabase>(mongoClient.GetDatabase(databaseName));
-        
+
+        services.AddScoped<IUnitOfWork, UnitOfWork>();
+        services.AddScoped(typeof(IApplicationRepository<>),  typeof(ApplicationRepository<>));
         
         return services;
     }

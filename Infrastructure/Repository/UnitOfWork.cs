@@ -1,4 +1,4 @@
-﻿using ChatSystemBackend.Domain.Interfaces;
+﻿using ChatSystemBackend.Application.Interfaces;
 using MongoDB.Driver;
 
 namespace ChatSystemBackend.Infrastructure.Repository;
