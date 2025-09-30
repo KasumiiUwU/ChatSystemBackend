@@ -1,4 +1,5 @@
 ﻿using ChatSystemBackend.Application.DTO.Requests;
+using ChatSystemBackend.Application.DTO.Responses;
 using ChatSystemBackend.Application.Interfaces;
 using ChatSystemBackend.Domain.Entities;
 using ChatSystemBackend.Domain.Enums;
@@ -25,16 +26,19 @@ public class ConversationService : IConversationService
     }
 
     //tạo conversation, tạo 2 participant cho conversation này
-    public async Task<string> CreateDirectConversation(ConversationRequest conversationRequest)
+    public async Task<Conversation> CreateDirectConversation(ConversationRequest conversationRequest)
     {
         var conversation = MapConversationRequestToConversation(conversationRequest);
+        var participant = GenerateParticipants(conversationRequest, conversation);
 
         await _conversationRepository.InsertAsync(conversation);
 
-        return "asd";
+        
+        
+        return conversation;
     }
 
-    private async Task GenerateParticipants(ConversationRequest conversationRequest, Conversation conversation)
+    private async Task<IEnumerable<ConversationParticipantResponse>> GenerateParticipants(ConversationRequest conversationRequest, Conversation conversation)
     {
         //get 2 userId
         var inviter = _tokenService.GetUserIdFromHttpContext(_httpContextAccessor);
@@ -55,8 +59,7 @@ public class ConversationService : IConversationService
                 ConversationId = conversation.Id, 
             }
             ]);
-        
- 
+        return participants;
     }
 
     public string CreateGroupConversation(ConversationRequest request)
@@ -76,5 +79,19 @@ public class ConversationService : IConversationService
         };
 
         return conversation;
+    }
+    
+    
+    private ConversationResponse MapConversationToConversationResponse(Conversation conversation)
+    {
+        var conversationResponse = new ConversationResponse
+        {
+            Type = nameof(conversation.Type),
+            GroupName = conversation.GroupName,
+            AvatarUrl = "DefaultAvatarUrl",
+            CreatedAt = conversation.CreatedAt,
+        };
+
+        return conversationResponse;
     }
 }

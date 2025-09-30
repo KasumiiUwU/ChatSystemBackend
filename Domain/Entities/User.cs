@@ -14,6 +14,8 @@ public class User : BaseEntity
     
     public required string Avatar { get; set; }
     
+    public required Enum Role { get; set; }
+    
     public OnlineStatus  OnlineStatus { get; set; }
     
     

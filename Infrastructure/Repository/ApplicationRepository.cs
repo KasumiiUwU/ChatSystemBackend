@@ -45,6 +45,18 @@ public class ApplicationRepository<TEntity> : IApplicationRepository<TEntity> wh
         return await query.ToListAsync();
     }
 
+    public async Task<TEntity> GetFirstOrDefaultAsync(
+        Expression<Func<TEntity, bool>> filter)
+    {
+        IQueryable<TEntity> query = _collection.AsQueryable();
+        if (filter != null)
+        {
+            query = query.Where(filter);
+        }
+        
+        return await query.FirstOrDefaultAsync();
+    }
+
     public Task<TEntity> GetByIdAsync(object id)
     {
         var filter = Builders<TEntity>.Filter.Eq("_id", id);
@@ -74,4 +86,12 @@ public class ApplicationRepository<TEntity> : IApplicationRepository<TEntity> wh
         var count = await _collection.CountDocumentsAsync(filter);
         return count > 0;
     }
+    
+    public async Task<bool> ExistsByFieldAsync(string fieldName, object value)
+    {
+        var filter = Builders<TEntity>.Filter.Eq(fieldName, value);
+        var count = await _collection.CountDocumentsAsync(filter);
+        return count > 0;
+    }
+
 }

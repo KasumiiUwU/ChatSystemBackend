@@ -5,6 +5,6 @@ namespace ChatSystemBackend.Application.Interfaces;
 
 public interface IConversationService
 {
-    public Task<string> CreateDirectConversation(ConversationRequest request);
+    public Task<Conversation> CreateDirectConversation(ConversationRequest request);
     public string CreateGroupConversation(ConversationRequest request);
 }
