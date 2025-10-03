@@ -2,6 +2,8 @@
 using ChatSystemBackend.Application.DTO.Responses;
 using ChatSystemBackend.Application.Interfaces;
 using ChatSystemBackend.Domain.Entities;
+using ChatSystemBackend.Domain.Enums;
+using ChatSystemBackend.Utils;
 
 namespace ChatSystemBackend.Application.Services;
 
@@ -26,18 +28,18 @@ public class ConversationParticipantService : IConversationParticipantService
             var participant = MapConversationRequestToConversation(conversationParticipantRequest);
 
             await _conversationParticipantRepository.InsertAsync(participant);
-
-            responses.Add(new ConversationParticipantResponse
-            {
-                Id = participant.Id,
-                UserId = participant.UserId,
-                ConversationId = participant.ConversationId,
-                Role = participant.Role,
-                JoinedAt = participant.JoinedAt
-            });
+            
+            responses.Add(MapToConversationResponse(participant));
+            
         }
 
         return responses;
+    }
+
+    public async Task<bool> IsMember(Guid conversationId, Guid memberId)
+    {
+        return await _conversationParticipantRepository.ExistAsync(
+            p => p.ConversationId == conversationId && p.UserId == memberId);
     }
 
     private static ConversationParticipant MapConversationRequestToConversation(ConversationParticipantRequest request)
@@ -46,7 +48,18 @@ public class ConversationParticipantService : IConversationParticipantService
         {
             UserId = request.UserId,
             ConversationId = request.ConversationId,
-            Role = request.Role
+            Role = EnumHelper.ToEnum<ConversationParticipantRole>(request.Role)
+        };
+    }
+    private static ConversationParticipantResponse MapToConversationResponse(ConversationParticipant participant)
+    {
+        return new ConversationParticipantResponse
+        {
+            Id = participant.Id,
+            UserId = participant.UserId,
+            ConversationId = participant.ConversationId,
+            Role = EnumHelper.ToStringValue(participant.Role),
+            JoinedAt = participant.JoinedAt
         };
     }
 }

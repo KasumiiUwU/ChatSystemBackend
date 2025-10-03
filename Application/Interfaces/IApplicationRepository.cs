@@ -16,6 +16,6 @@ public interface IApplicationRepository<TEntity> where TEntity : class
     Task InsertAsync(TEntity entity);
     Task UpdateAsync(object id, TEntity entity);
     Task DeleteAsync(object id);
-    Task<bool> ExistAsync(object id);
-    Task<bool> ExistsByFieldAsync(string fieldName, object value);
+    Task<bool> ExistAsync(Expression<Func<TEntity, bool>> predicate);
+
 }

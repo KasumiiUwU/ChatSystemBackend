@@ -8,7 +8,7 @@ public interface ITokenService
 {
     string GetTokenFromHttpContext(IHttpContextAccessor httpContextAccessor);
 
-    Task<Guid> GetUserIdFromHttpContext(IHttpContextAccessor httpContextAccessor);
+    Guid GetUserIdFromHttpContext(IHttpContextAccessor httpContextAccessor);
 
     string GenerateToken(UserResponse user);
 }

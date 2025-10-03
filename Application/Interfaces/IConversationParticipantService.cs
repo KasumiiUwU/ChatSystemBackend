@@ -7,4 +7,5 @@ namespace ChatSystemBackend.Application.Interfaces;
 public interface IConversationParticipantService
 {
     public Task<IEnumerable<ConversationParticipantResponse>> CreateConversationParticipant(IEnumerable<ConversationParticipantRequest> request);
+    public Task<bool> IsMember(Guid conversationId, Guid memberId);
 }

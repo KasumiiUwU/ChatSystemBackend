@@ -1,8 +1,10 @@
-﻿using ChatSystemBackend.Application.DTO.Requests;
+﻿using System.Reflection;
+using ChatSystemBackend.Application.DTO.Requests;
 using ChatSystemBackend.Application.DTO.Responses;
 using ChatSystemBackend.Application.Interfaces;
 using ChatSystemBackend.Domain.Entities;
 using ChatSystemBackend.Domain.Enums;
+using ChatSystemBackend.Exceptions;
 using ChatSystemBackend.Utils;
 
 namespace ChatSystemBackend.Application.Services;
@@ -26,21 +28,30 @@ public class ConversationService : IConversationService
     }
 
     //tạo conversation, tạo 2 participant cho conversation này
-    public async Task<Conversation> CreateDirectConversation(ConversationRequest conversationRequest)
+    public async Task<ConversationResponse> CreateDirectConversation(ConversationRequest conversationRequest)
     {
-        var conversation = MapConversationRequestToConversation(conversationRequest);
-        var participant = GenerateParticipants(conversationRequest, conversation);
-
+        var conversation = MapToConversation(conversationRequest);
+        
         await _conversationRepository.InsertAsync(conversation);
+        
+        var participant = await GenerateParticipants(conversation, conversationRequest.UserReceiveId);
 
         
         
-        return conversation;
+        return MapToConversationResponse(conversation);
     }
 
-    private async Task<IEnumerable<ConversationParticipantResponse>> GenerateParticipants(ConversationRequest conversationRequest, Conversation conversation)
+    public async Task<IEnumerable<ConversationResponse>> GetAllConversations()
     {
-        //get 2 userId
+        var conversations = await _conversationRepository.GetAllAsync();
+        if (conversations == null || !conversations.Any()) 
+            throw new CustomExceptions.DataNotFoundException("Not found conversation");
+
+        return conversations.Select(con => MapToConversationResponse(con)).ToList();
+    }
+
+    private async Task<IEnumerable<ConversationParticipantResponse>> GenerateParticipants(Conversation conversation, Guid targetUserId)
+    {
         var inviter = _tokenService.GetUserIdFromHttpContext(_httpContextAccessor);
 
         //tạo 2 participants
@@ -48,14 +59,14 @@ public class ConversationService : IConversationService
             await _conversationParticipantService.CreateConversationParticipant([
                 new ConversationParticipantRequest
             {
-                UserId = inviter.Result, 
-                Role = nameof(ConversationParticipantRole.Member),
+                UserId = inviter, 
+                Role = EnumHelper.ToStringValue(ConversationParticipantRole.Member),
                 ConversationId = conversation.Id, 
             },
             new ConversationParticipantRequest
             {
-                UserId = conversationRequest.UserReceiveId, 
-                Role = nameof(ConversationParticipantRole.Member),
+                UserId = targetUserId, 
+                Role = EnumHelper.ToStringValue(ConversationParticipantRole.Member),
                 ConversationId = conversation.Id, 
             }
             ]);
@@ -67,26 +78,24 @@ public class ConversationService : IConversationService
         throw new NotImplementedException();
     }
 
-
-    private Conversation MapConversationRequestToConversation(ConversationRequest conversationRequest)
+    private Conversation MapToConversation(ConversationRequest conversationRequest)
     {
         var conversation = new Conversation
         {
             Type = EnumHelper.ToEnum<ConversationType>(conversationRequest.Type),
             GroupName = conversationRequest.GroupName,
             AvatarUrl = "DefaultAvatarUrl",
-            CreatedAt = DateTime.Now
         };
 
         return conversation;
     }
     
     
-    private ConversationResponse MapConversationToConversationResponse(Conversation conversation)
+    private ConversationResponse MapToConversationResponse(Conversation conversation)
     {
         var conversationResponse = new ConversationResponse
         {
-            Type = nameof(conversation.Type),
+            Type = EnumHelper.ToStringValue(conversation.Type),
             GroupName = conversation.GroupName,
             AvatarUrl = "DefaultAvatarUrl",
             CreatedAt = conversation.CreatedAt,

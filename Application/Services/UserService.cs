@@ -73,7 +73,7 @@ public class UserService : IUserService
 
     public async Task<bool> IsUsernameExists(string username)
     {
-        return await _userRepository.ExistsByFieldAsync("Username", username);
+        return await _userRepository.ExistAsync(u => u.Username == username);
     }
 
     

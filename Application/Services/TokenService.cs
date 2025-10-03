@@ -38,11 +38,20 @@ public class TokenService : ITokenService
 
     
     
-    public Task<Guid> GetUserIdFromHttpContext(IHttpContextAccessor httpContextAccessor)
+    public Guid GetUserIdFromHttpContext(IHttpContextAccessor httpContextAccessor)
     {
-        var token = GetTokenFromHttpContext(httpContextAccessor);
+       var token = GetTokenFromHttpContext(httpContextAccessor);
         
-        return null;
+        var jwtSecurityToken = _jwtSecurityTokenHandler.ReadJwtToken(token);
+        
+        var idClaim = jwtSecurityToken.Claims.FirstOrDefault(claim => claim.Type == "id");
+
+        if (idClaim == null || string.IsNullOrWhiteSpace(idClaim.Value))
+        {
+            throw new Exception("User ID claim not found in token.");
+        }
+
+        return Guid.Parse(idClaim.Value);
     }
 
     public string GenerateToken(UserResponse user)

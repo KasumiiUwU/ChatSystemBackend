@@ -15,7 +15,7 @@ public class AuthenticationController : BaseController
     }
 
     [HttpPost("Register")]
-    public async Task<IActionResult> Register(RegisterRequest registerRequest)
+    public async Task<IActionResult> Register([FromBody] RegisterRequest registerRequest)
     {
         var user = await _authenticationService.Register(registerRequest);
         return CustomResult("Đăng ký thành công! ", user);
