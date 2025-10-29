@@ -20,8 +20,15 @@ public class ConversationController  : BaseController
     [HttpGet]
     public async Task<IActionResult> GetAll()
     {
-        var ressult = await _conversationService.GetAllConversations();
-        return CustomResult("Success", ressult);
+        var result = await _conversationService.GetAllConversations();
+        return CustomResult("Success", result);
+    }
+
+    [HttpGet("getConversationsByUserLoggedIn")]
+    public async Task<IActionResult> GetConversationsByUserLoggedIn()
+    {
+        var result = await _conversationService.GetConversationsFromUserLoggingIn();
+        return CustomResult("Success", result);
     }
 
     [HttpPost("CreateDirectConversation")]

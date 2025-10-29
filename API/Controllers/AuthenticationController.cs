@@ -5,6 +5,8 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace ChatSystemBackend.API.Controllers;
 
+[ApiController]
+[Route("api/[controller]")]
 public class AuthenticationController : BaseController
 {
     private readonly IAuthenticationService _authenticationService;
@@ -14,14 +16,14 @@ public class AuthenticationController : BaseController
         _authenticationService = authenticationService;
     }
 
-    [HttpPost("Register")]
+    [HttpPost("register")]
     public async Task<IActionResult> Register([FromBody] RegisterRequest registerRequest)
     {
         var user = await _authenticationService.Register(registerRequest);
         return CustomResult("Đăng ký thành công! ", user);
     }
 
-    [HttpPost("Login")]
+    [HttpPost("login")]
     public async Task<IActionResult> Login([FromBody] LoginRequest loginRequest)
     {
         var token = await _authenticationService.Login(loginRequest);

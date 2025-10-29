@@ -1,10 +1,12 @@
 ﻿using ChatSystemBackend.Application.DTO.Requests;
 using ChatSystemBackend.Application.DTO.Responses;
 using ChatSystemBackend.Application.Interfaces;
+using ChatSystemBackend.Application.SignalRHub;
 using ChatSystemBackend.Domain.Entities;
 using ChatSystemBackend.Domain.Enums;
 using ChatSystemBackend.Exceptions;
 using ChatSystemBackend.Utils;
+using Microsoft.AspNetCore.SignalR;
 
 namespace ChatSystemBackend.Application.Services;
 
@@ -15,13 +17,15 @@ public class MessageService : IMessageService
     private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly ITokenService _tokenService;
     private readonly IConversationParticipantService _conversationParticipantService;
+    private readonly IHubContext<ChatHub> _chatHub;
 
-    public MessageService(IUnitOfWork unitOfWork, IHttpContextAccessor httpContextAccessor, ITokenService tokenService, IConversationParticipantService conversationParticipantService)
+    public MessageService(IUnitOfWork unitOfWork, IHttpContextAccessor httpContextAccessor, ITokenService tokenService, IConversationParticipantService conversationParticipantService, IHubContext<ChatHub> chatHub)
     {
         _unitOfWork = unitOfWork;
         _httpContextAccessor = httpContextAccessor;
         _tokenService = tokenService;
         _conversationParticipantService = conversationParticipantService;
+        _chatHub = chatHub;
         _messageRepository = unitOfWork.Repository<Message>("Messages");
     }
 
@@ -29,6 +33,12 @@ public class MessageService : IMessageService
     {
         var message = await _messageRepository.GetAllAsync();
         return message.Select(MapToMessageResponse).ToList();
+    }
+
+    public Task<IEnumerable<MessageResponse>> GetMessages(Guid conversationId, int pageIndex, int pageSize)
+    {
+        
+        throw new NotImplementedException();
     }
 
     public async Task<MessageResponse> SendMessage(MessageRequest request)
@@ -47,8 +57,9 @@ public class MessageService : IMessageService
         message.SenderId = userIdLoggedIn;
       
         await _messageRepository.InsertAsync(message);
-        
-        return MapToMessageResponse(message);
+
+        var response = MapToMessageResponse(message);
+        return response;
     }
 
     private static MessageResponse MapToMessageResponse(Message message)

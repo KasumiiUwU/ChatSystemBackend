@@ -23,6 +23,7 @@ public static class ApplicationServices
         services.AddHttpContextAccessor();
         services.AddControllers();
         services.AddSwaggerDocumentation();
+        services.AddCors();
         return services;
     }
 
@@ -37,6 +38,8 @@ public static class ApplicationServices
         services.AddScoped<IUserService, UserService>();
         services.AddScoped<IMessageService, MessageService>();
         services.AddSingleton<IPasswordUtils, PasswordUtils>();
+        services.AddSignalR();
+        
         return services;
     }
 
@@ -67,7 +70,7 @@ public static class ApplicationServices
                     {
                         if (context.Exception.GetType() == typeof(SecurityTokenExpiredException))
                         {
-                            context.Response.Headers.Add("Token-Expired", "true");
+                            context.Response.Headers.Append("Token-Expired", "true");
                         }
 
                         return Task.CompletedTask;
@@ -142,6 +145,13 @@ public static class ApplicationServices
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddScoped(typeof(IApplicationRepository<>), typeof(ApplicationRepository<>));
 
+        return services;
+    }
+
+    private static IServiceCollection AddCors(this IServiceCollection services)
+    {
+        services.AddCors(o => o.AddDefaultPolicy(
+            builder =>builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader() ));
         return services;
     }
 }

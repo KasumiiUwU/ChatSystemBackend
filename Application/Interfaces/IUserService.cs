@@ -12,4 +12,5 @@ public interface IUserService
     public Task<bool> IsUsernameExists(string username);
     Task<UserResponse> ValidateUserAsync(string username, string password);
 
+    Task<UserResponse> GetUserByIdAsync(Guid otherUserId);
 }

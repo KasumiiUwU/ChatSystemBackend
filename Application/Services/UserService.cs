@@ -42,6 +42,42 @@ public class UserService : IUserService
         return MapToResponse(user);
     }
 
+
+
+    public async Task<bool> IsUsernameExists(string username)
+    {
+        return await _userRepository.ExistAsync(u => u.Username == username);
+    }
+
+    
+    public async Task<UserResponse> ValidateUserAsync(string username, string password)
+    {
+        var user = await _userRepository.GetFirstOrDefaultAsync(x => x.Username == username);
+        
+        if (user == null)
+            throw new CustomExceptions.InvalidDataException("Username or password is incorrect");
+        
+        //check 2 password giống nhau ko
+        var isMatch = _passwordUtils.VerifyPassword(password, user.Password);
+        
+        if (!isMatch)
+            throw new CustomExceptions.InvalidDataException("Username or password is incorrect");
+
+        
+        return MapToResponse(user);
+    }
+
+    public async Task<UserResponse> GetUserByIdAsync(Guid otherUserId)
+    {
+        var user = await _userRepository.GetByIdAsync(otherUserId);
+        if (user == null) throw new CustomExceptions.DataNotFoundException("User not found");
+
+        return MapToResponse(user);
+    }
+    
+    
+    
+    //Map functions
     private static User MapToUser(UserRequest request)
     {
         var user = new User
@@ -69,28 +105,5 @@ public class UserService : IUserService
         };
         
         return response;
-    }
-
-    public async Task<bool> IsUsernameExists(string username)
-    {
-        return await _userRepository.ExistAsync(u => u.Username == username);
-    }
-
-    
-    public async Task<UserResponse> ValidateUserAsync(string username, string password)
-    {
-        var user = await _userRepository.GetFirstOrDefaultAsync(x => x.Username == username);
-        
-        if (user == null)
-            throw new CustomExceptions.InvalidDataException("Username or password is incorrect");
-        
-        //check 2 password giống nhau ko
-        var isMatch = _passwordUtils.VerifyPassword(password, user.Password);
-        
-        if (!isMatch)
-            throw new CustomExceptions.InvalidDataException("Username or password is incorrect");
-
-        
-        return MapToResponse(user);
     }
 }
